@@ -54,7 +54,7 @@ const VideoPlayer = ({ filename }) => {
         onLoadedData={handleLoadedData}
         className="w-full rounded"
       >
-        <source src={`http://localhost:5000/uploads/${filename}`} type="video/mp4" />
+        <source src={`https://streamify-backend.onrender.com/uploads/${filename}`} type="video/mp4" />
         Your browser does not support the video tag.
       </video>
     </div>

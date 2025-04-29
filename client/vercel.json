@@ -1,10 +1,9 @@
 {
   "version": 2,
   "framework": "vite",
-  "buildCommand": "CI=false npm install && npm run build",
-  "installCommand": "CI=false npm install",
+  "buildCommand": "npm run build",
+  "installCommand": "npm install",
   "outputDirectory": "dist",
-  "nodeVersion": "18.x",
   "routes": [
     {
       "src": "/api/(.*)",

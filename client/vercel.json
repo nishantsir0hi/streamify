@@ -1,8 +1,8 @@
 {
   "version": 2,
   "framework": "vite",
-  "buildCommand": "npm run vercel-build",
-  "installCommand": "npm install",
+  "buildCommand": "CI=false npm install && npm run build",
+  "installCommand": "CI=false npm install",
   "outputDirectory": "dist",
   "nodeVersion": "18.x",
   "routes": [

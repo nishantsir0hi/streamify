@@ -8,8 +8,7 @@ export default defineConfig({
     port: 5173,
     host: true,
     strictPort: true,
-    open: true,
-    allowedHosts: ['2542-2405-201-680f-1ad5-14ff-b306-d2f1-66dd.ngrok-free.app', '5672-2405-201-680f-1ad5-14ff-b306-d2f1-66dd.ngrok-free.app']
+    open: true
   },
   resolve: {
     alias: {
@@ -19,7 +18,7 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
-    sourcemap: false,
+    sourcemap: true,
     minify: 'terser',
     rollupOptions: {
       output: {
@@ -29,5 +28,7 @@ export default defineConfig({
       },
     },
   },
-  logLevel: 'info'
+  optimizeDeps: {
+    include: ['react', 'react-dom']
+  }
 })

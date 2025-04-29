@@ -6,12 +6,19 @@
   background: #000;
   border-radius: 8px;
   overflow: hidden;
+  aspect-ratio: 16/9;
 }
 
 .video-element {
   width: 100%;
-  height: auto;
+  height: 100%;
   display: block;
+  object-fit: cover;
+  background: #000;
+  will-change: transform;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
 }
 
 .loading {
@@ -55,8 +62,12 @@
 }
 
 .video-info {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
   padding: 1rem;
-  background: rgba(0, 0, 0, 0.8);
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
   color: white;
 }
 
@@ -68,6 +79,21 @@
 .time-info {
   font-size: 0.9rem;
   opacity: 0.8;
+}
+
+.buffer-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.buffer-bar {
+  height: 100%;
+  background: rgba(255, 255, 255, 0.4);
+  transition: width 0.3s ease;
 }
 
 /* Custom video controls */

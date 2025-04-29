@@ -3,9 +3,23 @@ import mongoose from 'mongoose';
 const movieSchema = new mongoose.Schema({
   title: {
     type: String,
-    required: true
+    required: true,
+    trim: true
   },
   filename: {
+    type: String,
+    required: true,
+    unique: true
+  },
+  originalName: {
+    type: String,
+    required: true
+  },
+  size: {
+    type: Number,
+    required: true
+  },
+  mimeType: {
     type: String,
     required: true
   },
@@ -14,6 +28,10 @@ const movieSchema = new mongoose.Schema({
     default: Date.now
   }
 });
+
+// Add index for faster queries
+movieSchema.index({ createdAt: -1 });
+movieSchema.index({ title: 'text' });
 
 const Movie = mongoose.model('Movie', movieSchema);
 

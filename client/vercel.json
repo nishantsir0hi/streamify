@@ -7,7 +7,7 @@
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "https://streamify-2.onrender.com/api/movies"
+      "dest": "https://streamify-backend.onrender.com/api/movies"
     },
     {
       "src": "/assets/(.*)",

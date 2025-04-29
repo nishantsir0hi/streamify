@@ -7,6 +7,8 @@ const VideoPlayer = ({ filename }) => {
   );
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [retryCount, setRetryCount] = useState(0);
+  const maxRetries = 3;
 
   useEffect(() => {
     if (videoRef.current) {
@@ -20,8 +22,17 @@ const VideoPlayer = ({ filename }) => {
 
   const handleError = (e) => {
     console.error('Video error:', e);
-    setError('Error loading video. Please try again later.');
-    setLoading(false);
+    if (retryCount < maxRetries) {
+      setRetryCount(prev => prev + 1);
+      setTimeout(() => {
+        if (videoRef.current) {
+          videoRef.current.load();
+        }
+      }, 1000 * retryCount); // Exponential backoff
+    } else {
+      setError('Error loading video. Please try refreshing the page or check your internet connection.');
+      setLoading(false);
+    }
   };
 
   const handleLoadStart = () => {
@@ -30,6 +41,22 @@ const VideoPlayer = ({ filename }) => {
   };
 
   const handleLoadedData = () => {
+    setLoading(false);
+    setRetryCount(0);
+  };
+
+  const handleStalled = () => {
+    console.log('Video stalled, attempting to recover...');
+    if (videoRef.current) {
+      videoRef.current.load();
+    }
+  };
+
+  const handleWaiting = () => {
+    setLoading(true);
+  };
+
+  const handlePlaying = () => {
     setLoading(false);
   };
 
@@ -48,13 +75,20 @@ const VideoPlayer = ({ filename }) => {
       <video
         ref={videoRef}
         controls
+        preload="auto"
         onTimeUpdate={handleTimeUpdate}
         onError={handleError}
         onLoadStart={handleLoadStart}
         onLoadedData={handleLoadedData}
+        onStalled={handleStalled}
+        onWaiting={handleWaiting}
+        onPlaying={handlePlaying}
         className="w-full rounded"
       >
-        <source src={`https://streamify-2.onrender.com/uploads/${filename}`} type="video/mp4" />
+        <source 
+          src={`https://streamify-2.onrender.com/uploads/${filename}`} 
+          type="video/mp4" 
+        />
         Your browser does not support the video tag.
       </video>
     </div>

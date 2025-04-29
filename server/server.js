@@ -22,21 +22,17 @@ if (!fs.existsSync(path.join(__dirname, 'uploads'))) {
 
 // Middleware
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production' 
-    ? ['https://your-frontend-domain.com'] 
-    : 'http://localhost:5173',
+  origin: '*', // Allow all origins in development
   credentials: true
 }));
 app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Debug middleware
-if (process.env.NODE_ENV !== 'production') {
-  app.use((req, res, next) => {
-    console.log(`${req.method} ${req.url}`);
-    next();
-  });
-}
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.url}`);
+  next();
+});
 
 // Routes
 app.use('/api/movies', movieRoutes);
@@ -44,6 +40,17 @@ app.use('/api/movies', movieRoutes);
 // Basic route
 app.get('/', (req, res) => {
   res.json({ message: 'Welcome to Streamify API' });
+});
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ message: 'Something broke!', error: err.message });
+});
+
+// 404 handler
+app.use((req, res) => {
+  res.status(404).json({ message: 'Route not found' });
 });
 
 // Connect to MongoDB Atlas

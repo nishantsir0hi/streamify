@@ -1,96 +1,112 @@
 import { useRef, useEffect, useState } from "react";
 
-const VideoPlayer = ({ filename }) => {
-  const videoRef = useRef();
-  const [currentTime, setCurrentTime] = useState(
-    localStorage.getItem(filename) ? parseFloat(localStorage.getItem(filename)) : 0
-  );
+const VideoPlayer = ({ videoUrl, title }) => {
+  const videoRef = useRef(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
   const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [retryCount, setRetryCount] = useState(0);
-  const maxRetries = 3;
+  const [isLoading, setIsLoading] = useState(true);
+  const [networkState, setNetworkState] = useState(null);
 
   useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const handleError = (e) => {
+      console.error('Video error:', e.target.error);
+      setError(`Error loading video: ${e.target.error?.message || 'Unknown error'}`);
+      setIsLoading(false);
+    };
+
+    const handleLoadStart = () => {
+      console.log('Video load started');
+      setIsLoading(true);
+      setError(null);
+    };
+
+    const handleLoadedMetadata = () => {
+      console.log('Video metadata loaded');
+      setIsLoading(false);
+      setDuration(video.duration);
+    };
+
+    const handleTimeUpdate = () => {
+      setCurrentTime(video.currentTime);
+      localStorage.setItem(`videoTime_${videoUrl}`, video.currentTime);
+    };
+
+    const handleNetworkStateChange = () => {
+      const states = ['NETWORK_EMPTY', 'NETWORK_IDLE', 'NETWORK_LOADING', 'NETWORK_NO_SOURCE'];
+      setNetworkState(states[video.networkState]);
+      console.log('Network state:', states[video.networkState]);
+    };
+
+    video.addEventListener('error', handleError);
+    video.addEventListener('loadstart', handleLoadStart);
+    video.addEventListener('loadedmetadata', handleLoadedMetadata);
+    video.addEventListener('timeupdate', handleTimeUpdate);
+    video.addEventListener('networkstatechange', handleNetworkStateChange);
+
+    // Restore previous time
+    const savedTime = localStorage.getItem(`videoTime_${videoUrl}`);
+    if (savedTime) {
+      video.currentTime = parseFloat(savedTime);
+    }
+
+    return () => {
+      video.removeEventListener('error', handleError);
+      video.removeEventListener('loadstart', handleLoadStart);
+      video.removeEventListener('loadedmetadata', handleLoadedMetadata);
+      video.removeEventListener('timeupdate', handleTimeUpdate);
+      video.removeEventListener('networkstatechange', handleNetworkStateChange);
+    };
+  }, [videoUrl]);
+
+  const togglePlay = () => {
     if (videoRef.current) {
-      videoRef.current.currentTime = currentTime;
-    }
-  }, [currentTime]);
-
-  const handleTimeUpdate = () => {
-    localStorage.setItem(filename, videoRef.current.currentTime);
-  };
-
-  const handleError = (e) => {
-    console.error('Video error:', e);
-    if (retryCount < maxRetries) {
-      setRetryCount(prev => prev + 1);
-      setTimeout(() => {
-        if (videoRef.current) {
-          videoRef.current.load();
-        }
-      }, 1000 * retryCount); // Exponential backoff
-    } else {
-      setError('Error loading video. Please try refreshing the page or check your internet connection.');
-      setLoading(false);
+      if (isPlaying) {
+        videoRef.current.pause();
+      } else {
+        videoRef.current.play();
+      }
+      setIsPlaying(!isPlaying);
     }
   };
 
-  const handleLoadStart = () => {
-    setLoading(true);
-    setError(null);
-  };
-
-  const handleLoadedData = () => {
-    setLoading(false);
-    setRetryCount(0);
-  };
-
-  const handleStalled = () => {
-    console.log('Video stalled, attempting to recover...');
-    if (videoRef.current) {
-      videoRef.current.load();
-    }
-  };
-
-  const handleWaiting = () => {
-    setLoading(true);
-  };
-
-  const handlePlaying = () => {
-    setLoading(false);
+  const formatTime = (time) => {
+    const minutes = Math.floor(time / 60);
+    const seconds = Math.floor(time % 60);
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   };
 
   return (
-    <div className="relative">
-      {loading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50">
-          <div className="text-white">Loading video...</div>
-        </div>
-      )}
+    <div className="video-player">
       {error && (
-        <div className="absolute inset-0 flex items-center justify-center bg-red-500 bg-opacity-50">
-          <div className="text-white">{error}</div>
+        <div className="error-message">
+          <p>{error}</p>
+          <p>Network State: {networkState}</p>
+          <button onClick={() => window.location.reload()}>Retry</button>
         </div>
       )}
+      {isLoading && <div className="loading">Loading video...</div>}
       <video
         ref={videoRef}
+        src={videoUrl}
         controls
-        preload="auto"
-        onTimeUpdate={handleTimeUpdate}
-        onError={handleError}
-        onLoadStart={handleLoadStart}
-        onLoadedData={handleLoadedData}
-        onStalled={handleStalled}
-        onWaiting={handleWaiting}
-        onPlaying={handlePlaying}
-        className="w-full rounded"
-      >
-        <source 
-          src={`https://streamify-2.onrender.com/uploads/${filename}`} 
-          type="video/mp4" 
-        />
-        Your browser does not support the video tag.
-      </video>
+        onPlay={() => setIsPlaying(true)}
+        onPause={() => setIsPlaying(false)}
+        className="video-element"
+        crossOrigin="anonymous"
+      />
+      <div className="video-info">
+        <h2>{title}</h2>
+        <div className="time-info">
+          <span>{formatTime(currentTime)}</span>
+          <span> / </span>
+          <span>{formatTime(duration)}</span>
+        </div>
+      </div>
     </div>
   );
 };

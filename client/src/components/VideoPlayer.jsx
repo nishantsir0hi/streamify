@@ -10,13 +10,14 @@ const VideoPlayer = ({ videoUrl, title }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [networkState, setNetworkState] = useState(null);
   const [buffered, setBuffered] = useState(0);
+  const [canPlay, setCanPlay] = useState(false);
 
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
 
     // Preload video metadata
-    video.preload = "metadata";
+    video.preload = "auto";
 
     const handleError = (e) => {
       console.error('Video error:', e.target.error);
@@ -32,7 +33,6 @@ const VideoPlayer = ({ videoUrl, title }) => {
 
     const handleLoadedMetadata = () => {
       console.log('Video metadata loaded');
-      setIsLoading(false);
       setDuration(video.duration);
       
       // Restore previous time after metadata is loaded
@@ -40,6 +40,12 @@ const VideoPlayer = ({ videoUrl, title }) => {
       if (savedTime) {
         video.currentTime = parseFloat(savedTime);
       }
+    };
+
+    const handleCanPlay = () => {
+      console.log('Video can play');
+      setCanPlay(true);
+      setIsLoading(false);
     };
 
     const handleTimeUpdate = () => {
@@ -60,22 +66,45 @@ const VideoPlayer = ({ videoUrl, title }) => {
       console.log('Network state:', states[video.networkState]);
     };
 
+    const handleStalled = () => {
+      console.log('Video stalled, buffering...');
+      setIsLoading(true);
+    };
+
+    const handleWaiting = () => {
+      console.log('Video waiting for data...');
+      setIsLoading(true);
+    };
+
+    const handlePlaying = () => {
+      console.log('Video playing');
+      setIsLoading(false);
+    };
+
     // Add event listeners
     video.addEventListener('error', handleError);
     video.addEventListener('loadstart', handleLoadStart);
     video.addEventListener('loadedmetadata', handleLoadedMetadata);
+    video.addEventListener('canplay', handleCanPlay);
     video.addEventListener('timeupdate', handleTimeUpdate);
     video.addEventListener('progress', handleProgress);
     video.addEventListener('networkstatechange', handleNetworkStateChange);
+    video.addEventListener('stalled', handleStalled);
+    video.addEventListener('waiting', handleWaiting);
+    video.addEventListener('playing', handlePlaying);
 
     // Cleanup
     return () => {
       video.removeEventListener('error', handleError);
       video.removeEventListener('loadstart', handleLoadStart);
       video.removeEventListener('loadedmetadata', handleLoadedMetadata);
+      video.removeEventListener('canplay', handleCanPlay);
       video.removeEventListener('timeupdate', handleTimeUpdate);
       video.removeEventListener('progress', handleProgress);
       video.removeEventListener('networkstatechange', handleNetworkStateChange);
+      video.removeEventListener('stalled', handleStalled);
+      video.removeEventListener('waiting', handleWaiting);
+      video.removeEventListener('playing', handlePlaying);
     };
   }, [videoUrl]);
 
@@ -84,10 +113,13 @@ const VideoPlayer = ({ videoUrl, title }) => {
       if (isPlaying) {
         videoRef.current.pause();
       } else {
-        videoRef.current.play().catch(err => {
-          console.error('Error playing video:', err);
-          setError('Error playing video. Please try again.');
-        });
+        const playPromise = videoRef.current.play();
+        if (playPromise !== undefined) {
+          playPromise.catch(err => {
+            console.error('Error playing video:', err);
+            setError('Error playing video. Please try again.');
+          });
+        }
       }
       setIsPlaying(!isPlaying);
     }
@@ -118,7 +150,7 @@ const VideoPlayer = ({ videoUrl, title }) => {
         className="video-element"
         crossOrigin="anonymous"
         playsInline
-        preload="metadata"
+        preload="auto"
       />
       <div className="video-info">
         <h2>{title}</h2>

@@ -11,6 +11,10 @@ const movieSchema = new mongoose.Schema({
     required: true,
     unique: true
   },
+  thumbnail: {
+    type: String,
+    required: true
+  },
   originalName: {
     type: String,
     required: true

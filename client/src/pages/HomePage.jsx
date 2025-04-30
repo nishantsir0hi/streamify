@@ -96,7 +96,7 @@ const HomePage = () => {
                 onClick={() => handleMovieClick(movie)}
               >
                 <img
-                  src={`https://img.youtube.com/vi/${movie.url.split('/').pop()}/maxresdefault.jpg`}
+                  src={movie.thumbnailUrl}
                   alt={movie.title}
                   className="movie-thumbnail"
                 />
@@ -119,7 +119,7 @@ const HomePage = () => {
                 onClick={() => handleMovieClick(movie)}
               >
                 <img
-                  src={`https://img.youtube.com/vi/${movie.url.split('/').pop()}/maxresdefault.jpg`}
+                  src={movie.thumbnailUrl}
                   alt={movie.title}
                   className="movie-thumbnail"
                 />
@@ -142,7 +142,7 @@ const HomePage = () => {
                 onClick={() => handleMovieClick(movie)}
               >
                 <img
-                  src={`https://img.youtube.com/vi/${movie.url.split('/').pop()}/maxresdefault.jpg`}
+                  src={movie.thumbnailUrl}
                   alt={movie.title}
                   className="movie-thumbnail"
                 />

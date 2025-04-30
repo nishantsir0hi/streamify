@@ -58,6 +58,35 @@ const upload = multer({
   }
 }).single('file');
 
+const thumbnailStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, uploadsDir);
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, 'thumb-' + uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+const uploadThumbnail = multer({
+  storage: thumbnailStorage,
+  limits: {
+    fileSize: 5000000, // 5MB
+    files: 1
+  },
+  fileFilter: (req, file, cb) => {
+    const filetypes = /\.(jpg|jpeg|png|webp)$/i;
+    const extname = filetypes.test(path.extname(file.originalname));
+    const mimetype = /^image\//.test(file.mimetype);
+
+    if (extname && mimetype) {
+      return cb(null, true);
+    } else {
+      return cb(new Error('Only image files (JPG, JPEG, PNG, WEBP) are allowed'));
+    }
+  }
+}).single('thumbnail');
+
 export const uploadMovie = (req, res) => {
   console.log('Upload request received:', {
     body: req.body,
@@ -94,41 +123,59 @@ export const uploadMovie = (req, res) => {
         await fs.promises.unlink(req.file.path);
         return res.status(400).json({ message: 'Movie title is required' });
       }
+
+      // Handle thumbnail upload
+      uploadThumbnail(req, res, async (thumbErr) => {
+        if (thumbErr) {
+          // Clean up the video file if thumbnail upload fails
+          await fs.promises.unlink(req.file.path);
+          return res.status(400).json({ 
+            message: 'Error uploading thumbnail',
+            error: thumbErr.message 
+          });
+        }
+
+        if (!req.file) {
+          // Clean up the video file if no thumbnail is provided
+          await fs.promises.unlink(req.file.path);
+          return res.status(400).json({ message: 'Thumbnail is required' });
+        }
       
-      console.log('File uploaded successfully:', req.file);
-      console.log('Creating movie document with title:', req.body.title);
-      
-      const movie = new Movie({ 
-        title: req.body.title.trim(), 
-        filename: req.file.filename,
-        originalName: req.file.originalname,
-        size: req.file.size,
-        mimeType: req.file.mimetype
-      });
-      
-      console.log('Saving movie to database...');
-      const savedMovie = await movie.save();
-      console.log('Movie saved successfully:', savedMovie);
-      
-      res.status(201).json({
-        ...savedMovie.toObject(),
-        url: `/uploads/${savedMovie.filename}`
+        console.log('File uploaded successfully:', req.file);
+        console.log('Creating movie document with title:', req.body.title);
+        
+        const movie = new Movie({ 
+          title: req.body.title.trim(), 
+          filename: req.file.filename,
+          thumbnail: req.file.filename,
+          originalName: req.file.originalname,
+          size: req.file.size,
+          mimeType: req.file.mimetype
+        });
+        
+        console.log('Saving movie to database...');
+        const savedMovie = await movie.save();
+        console.log('Movie saved successfully:', savedMovie);
+        
+        res.status(201).json({
+          ...savedMovie.toObject(),
+          url: `/uploads/${savedMovie.filename}`,
+          thumbnailUrl: `/uploads/${savedMovie.thumbnail}`
+        });
       });
     } catch (error) {
       console.error('Error in upload process:', error);
-      // Clean up the uploaded file if there's an error
+      // Clean up any uploaded files if there's an error
       if (req.file) {
         try {
           await fs.promises.unlink(req.file.path);
-          console.log('Cleaned up uploaded file after error');
-        } catch (cleanupError) {
-          console.error('Error cleaning up file:', cleanupError);
+        } catch (unlinkError) {
+          console.error('Error cleaning up file:', unlinkError);
         }
       }
       res.status(500).json({ 
-        message: 'Error uploading movie',
-        error: error.message,
-        details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+        message: 'Error processing upload',
+        error: error.message 
       });
     }
   });
@@ -147,10 +194,12 @@ export const getMovies = async (req, res) => {
     
     const moviesWithUrls = movies.map(movie => {
       const url = `${baseUrl}/uploads/${movie.filename}`;
-      console.log('Generated URL for movie:', { title: movie.title, url });
+      const thumbnailUrl = `${baseUrl}/uploads/${movie.thumbnail}`;
+      console.log('Generated URLs for movie:', { title: movie.title, url, thumbnailUrl });
       return {
         ...movie.toObject(),
-        url
+        url,
+        thumbnailUrl
       };
     });
     

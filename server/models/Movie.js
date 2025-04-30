@@ -13,7 +13,13 @@ const movieSchema = new mongoose.Schema({
   },
   thumbnail: {
     type: String,
-    required: true
+    required: true,
+    validate: {
+      validator: function(v) {
+        return /\.(jpg|jpeg|png|webp)$/i.test(v);
+      },
+      message: props => `${props.value} is not a valid image file. Only jpg, jpeg, png, and webp are allowed.`
+    }
   },
   originalName: {
     type: String,

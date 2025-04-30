@@ -106,7 +106,7 @@ const AdminDashboard = () => {
           {movies.map((movie) => (
             <div key={movie._id} className="bg-gray-800 p-4 rounded shadow">
               <h3 className="text-xl font-bold mb-2">{movie.title}</h3>
-              <VideoPlayer videoUrl={movie.url || movie.filename} title={movie.title} />
+              <VideoPlayer videoUrl={movie.url} title={movie.title} />
               <div className="flex justify-end mt-3">
                 <button
                   onClick={() => handleDelete(movie._id)}

@@ -17,6 +17,8 @@ const VideoPlayer = ({ videoUrl, title }) => {
     const video = videoRef.current;
     if (!video) return;
 
+    console.log('Video URL:', videoUrl); // Debug log
+
     const networkStates = ["EMPTY", "IDLE", "LOADING", "NO_SOURCE"];
 
     const handleLoadStart = () => {
@@ -129,6 +131,10 @@ const VideoPlayer = ({ videoUrl, title }) => {
         onPlay={() => setIsPlaying(true)}
         onPause={() => setIsPlaying(false)}
         className="video-element"
+        onError={(e) => {
+          console.error('Video error:', e.target.error);
+          setError(`Video error: ${e.target.error?.message || 'Failed to load video'}`);
+        }}
       />
 
       <div className="video-controls">

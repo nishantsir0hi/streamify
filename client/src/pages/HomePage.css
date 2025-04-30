@@ -1,30 +1,25 @@
-.movie-card {
-  position: relative;
-  transition: transform 0.3s ease;
+/* Netflix-inspired theme */
+:root {
+  --netflix-red: #e50914;
+  --netflix-black: #141414;
+  --netflix-dark-gray: #181818;
+  --netflix-light-gray: #808080;
+  --netflix-white: #ffffff;
 }
 
-.movie-card:hover {
-  transform: scale(1.05);
-  z-index: 10;
+.home-container {
+  min-height: 100vh;
+  background-color: var(--netflix-black);
+  color: var(--netflix-white);
+  font-family: 'Netflix Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
-.movie-card::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(to bottom, transparent 50%, rgba(0, 0, 0, 0.8));
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.movie-card:hover::after {
-  opacity: 1;
-}
-
+/* Hero Section */
 .hero-section {
   position: relative;
   height: 80vh;
   overflow: hidden;
+  margin-bottom: 2rem;
 }
 
 .hero-overlay {
@@ -33,18 +28,72 @@
   background: linear-gradient(
     to bottom,
     rgba(0, 0, 0, 0.4) 0%,
-    rgba(0, 0, 0, 0.8) 100%
+    rgba(20, 20, 20, 0.8) 100%
   );
   z-index: 1;
 }
 
 .hero-content {
   position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 2rem;
+  bottom: 35%;
+  left: 4%;
   z-index: 2;
+  max-width: 50%;
+}
+
+.hero-title {
+  font-size: 3.5rem;
+  font-weight: 900;
+  margin-bottom: 1.5rem;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.hero-buttons {
+  display: flex;
+  gap: 1rem;
+}
+
+.play-button {
+  background: var(--netflix-white);
+  color: var(--netflix-black);
+  padding: 0.8rem 2rem;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 1.2rem;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: background-color 0.2s ease;
+}
+
+.play-button:hover {
+  background: rgba(255, 255, 255, 0.75);
+}
+
+.info-button {
+  background: rgba(109, 109, 110, 0.7);
+  color: var(--netflix-white);
+  padding: 0.8rem 2rem;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 1.2rem;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: background-color 0.2s ease;
+}
+
+.info-button:hover {
+  background: rgba(109, 109, 110, 0.4);
+}
+
+/* Movie Rows */
+.movie-sections {
+  padding: 2rem 4%;
 }
 
 .movie-row {
@@ -54,102 +103,29 @@
 
 .movie-row-title {
   font-size: 1.5rem;
-  font-weight: bold;
+  font-weight: 700;
   margin-bottom: 1rem;
-  padding-left: 1rem;
+  color: var(--netflix-white);
 }
 
 .movie-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 1rem;
-  padding: 0 1rem;
+  padding: 0.5rem 0;
 }
 
-.play-button {
-  background: white;
-  color: black;
-  padding: 0.5rem 1.5rem;
+.movie-card {
+  position: relative;
   border-radius: 4px;
-  font-weight: bold;
-  transition: background-color 0.3s ease;
+  overflow: hidden;
+  transition: transform 0.3s ease;
+  aspect-ratio: 16/9;
 }
 
-.play-button:hover {
-  background: rgba(255, 255, 255, 0.8);
-}
-
-.info-button {
-  background: rgba(255, 255, 255, 0.2);
-  color: white;
-  padding: 0.5rem 1.5rem;
-  border-radius: 4px;
-  font-weight: bold;
-  transition: background-color 0.3s ease;
-}
-
-.info-button:hover {
-  background: rgba(255, 255, 255, 0.3);
-}
-
-@media (max-width: 768px) {
-  .hero-section {
-    height: 60vh;
-  }
-
-  .movie-grid {
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  }
-}
-
-@media (max-width: 480px) {
-  .hero-section {
-    height: 50vh;
-  }
-
-  .movie-grid {
-    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-  }
-}
-
-.home-container {
-  min-height: 100vh;
-  background-color: black;
-  color: white;
-}
-
-.loading-container,
-.error-container {
-  min-height: 100vh;
-  background-color: black;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.loading-text {
-  color: white;
-  font-size: 1.5rem;
-}
-
-.error-text {
-  color: #ef4444;
-  font-size: 1.5rem;
-}
-
-.hero-title {
-  font-size: 2.5rem;
-  font-weight: bold;
-  margin-bottom: 1rem;
-}
-
-.hero-buttons {
-  display: flex;
-  gap: 1rem;
-}
-
-.movie-sections {
-  padding: 2rem 1rem;
+.movie-card:hover {
+  transform: scale(1.05);
+  z-index: 10;
 }
 
 .movie-thumbnail {
@@ -162,21 +138,49 @@
 .movie-overlay {
   position: absolute;
   inset: 0;
-  background-color: rgba(0, 0, 0, 0);
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(0, 0, 0, 0.8) 100%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background-color 0.3s ease;
 }
 
 .movie-card:hover .movie-overlay {
-  background-color: rgba(0, 0, 0, 0.5);
+  opacity: 1;
 }
 
 .movie-card:hover .movie-thumbnail {
   transform: scale(1.1);
 }
 
+/* Loading and Error States */
+.loading-container,
+.error-container {
+  min-height: 100vh;
+  background-color: var(--netflix-black);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loading-text {
+  color: var(--netflix-white);
+  font-size: 1.5rem;
+  font-weight: 500;
+}
+
+.error-text {
+  color: var(--netflix-red);
+  font-size: 1.5rem;
+  font-weight: 500;
+}
+
+/* Video Player Section */
 .video-player-section {
   position: fixed;
   top: 0;
@@ -204,7 +208,7 @@
   right: 0;
   background: none;
   border: none;
-  color: white;
+  color: var(--netflix-white);
   font-size: 2rem;
   cursor: pointer;
   padding: 0.5rem;
@@ -213,4 +217,59 @@
 
 .close-button:hover {
   transform: scale(1.1);
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .hero-title {
+    font-size: 2.5rem;
+  }
+  
+  .hero-content {
+    max-width: 70%;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-section {
+    height: 60vh;
+  }
+
+  .hero-title {
+    font-size: 2rem;
+  }
+
+  .hero-content {
+    max-width: 80%;
+    bottom: 25%;
+  }
+
+  .movie-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-section {
+    height: 50vh;
+  }
+
+  .hero-title {
+    font-size: 1.5rem;
+  }
+
+  .hero-content {
+    max-width: 90%;
+    bottom: 20%;
+  }
+
+  .movie-grid {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  }
+
+  .play-button,
+  .info-button {
+    padding: 0.6rem 1.5rem;
+    font-size: 1rem;
+  }
 } 

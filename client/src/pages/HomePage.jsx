@@ -76,8 +76,12 @@ const HomePage = () => {
           <div className="hero-content">
             <h1 className="hero-title">{featuredMovie.title}</h1>
             <div className="hero-buttons">
-              <button className="play-button">▶ Play</button>
-              <button className="info-button">ℹ More Info</button>
+              <button className="play-button">
+                <span>▶</span> Play
+              </button>
+              <button className="info-button">
+                <span>ℹ</span> More Info
+              </button>
             </div>
           </div>
         </div>
@@ -89,7 +93,7 @@ const HomePage = () => {
         <section className="movie-row">
           <h2 className="movie-row-title">Trending Now</h2>
           <div className="movie-grid">
-            {movies.map((movie) => (
+            {movies.slice(0, 6).map((movie) => (
               <div 
                 key={movie._id} 
                 className="movie-card"
@@ -112,7 +116,7 @@ const HomePage = () => {
         <section className="movie-row">
           <h2 className="movie-row-title">Continue Watching</h2>
           <div className="movie-grid">
-            {movies.slice(5, 10).map((movie) => (
+            {movies.slice(6, 12).map((movie) => (
               <div 
                 key={movie._id} 
                 className="movie-card"
@@ -135,7 +139,7 @@ const HomePage = () => {
         <section className="movie-row">
           <h2 className="movie-row-title">Popular on Streamify</h2>
           <div className="movie-grid">
-            {movies.slice(10, 15).map((movie) => (
+            {movies.slice(12, 18).map((movie) => (
               <div 
                 key={movie._id} 
                 className="movie-card"

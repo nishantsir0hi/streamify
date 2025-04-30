@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import './Navbar.css';
-import logo from '../assets/logo.png';
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -23,8 +22,8 @@ const Navbar = () => {
   return (
     <nav className={`navbar ${isScrolled ? 'scrolled' : ''}`}>
       <div className="navbar-container">
-        <Link to="/">
-          <img src={logo} alt="Streamify" className="logo" />
+        <Link to="/" className="logo">
+          STREAMIFY
         </Link>
         <div className="nav-links">
           <Link 

@@ -4,8 +4,6 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
 import movieRoutes from './routes/movieRoutes.js';
-import authRoutes from './routes/authRoutes.js';
-import { authenticateToken } from './middleware/auth.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -44,14 +42,7 @@ app.use('/uploads', express.static(uploadsDir, {
 }));
 
 // Mount routes
-app.use('/api/auth', authRoutes);
 app.use('/api/movies', movieRoutes);
-
-// Protected routes
-app.use('/api/admin', authenticateToken, (req, res, next) => {
-  // Add admin-specific routes here
-  next();
-});
 
 // Error handling middleware
 app.use((err, req, res, next) => {

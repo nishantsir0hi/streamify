@@ -122,15 +122,21 @@ export const uploadMovie = (req, res) => {
         filename: req.files.file[0].filename,
         path: req.files.file[0].path,
         size: req.files.file[0].size,
-        mimetype: req.files.file[0].mimetype
+        mimetype: req.files.file[0].mimetype,
+        originalname: req.files.file[0].originalname
       } : 'No video file',
       thumbnail: req.files.thumbnail ? {
         filename: req.files.thumbnail[0].filename,
         path: req.files.thumbnail[0].path,
         size: req.files.thumbnail[0].size,
-        mimetype: req.files.thumbnail[0].mimetype
+        mimetype: req.files.thumbnail[0].mimetype,
+        originalname: req.files.thumbnail[0].originalname
       } : 'No thumbnail file'
-    } : 'No files'
+    } : 'No files',
+    headers: {
+      'content-type': req.headers['content-type'],
+      'content-length': req.headers['content-length']
+    }
   });
   
   upload(req, res, async (err) => {
@@ -139,7 +145,8 @@ export const uploadMovie = (req, res) => {
         message: err.message,
         code: err.code,
         field: err.field,
-        stack: err.stack
+        stack: err.stack,
+        headers: req.headers
       });
       if (err.code === 'LIMIT_FILE_SIZE') {
         return res.status(400).json({ 

@@ -1,7 +1,7 @@
 import axios from "axios";
 
-// Base API URL from environment variable
-const API_BASE_URL = import.meta.env.VITE_API_URL;
+// Base API URL
+const API_BASE_URL = "http://localhost:5001/api/movies";
 console.log("📡 API URL:", API_BASE_URL); // Debug log
 
 /**
@@ -10,7 +10,7 @@ console.log("📡 API URL:", API_BASE_URL); // Debug log
  */
 export const getMovies = async () => {
   try {
-    const response = await axios.get(`${API_BASE_URL}/api/movies`);
+    const response = await axios.get(API_BASE_URL);
     return response.data;
   } catch (error) {
     console.error("❌ Failed to fetch movies:", error.message, error.response?.data);
@@ -35,7 +35,7 @@ export const uploadMovie = async (title, file, thumbnail) => {
     const uploadUrl = `${API_BASE_URL}/upload`;
     console.log("⏫ Uploading movie to:", uploadUrl);
 
-    await axios.post(uploadUrl, formData, {
+    const response = await axios.post(uploadUrl, formData, {
       headers: { 
         "Content-Type": "multipart/form-data"
       },
@@ -45,7 +45,8 @@ export const uploadMovie = async (title, file, thumbnail) => {
       }
     });
 
-    console.log("✅ Movie uploaded successfully");
+    console.log("✅ Movie uploaded successfully:", response.data);
+    return response.data;
   } catch (error) {
     console.error("❌ Movie upload failed:", error.message, error.response?.data);
     throw error;
@@ -59,7 +60,7 @@ export const uploadMovie = async (title, file, thumbnail) => {
  */
 export const deleteMovie = async (id) => {
   try {
-    await axios.delete(`${API_BASE_URL}/api/movies/${id}`);
+    await axios.delete(`${API_BASE_URL}/${id}`);
     console.log("✅ Movie deleted successfully");
   } catch (error) {
     console.error("❌ Movie deletion failed:", error.message);

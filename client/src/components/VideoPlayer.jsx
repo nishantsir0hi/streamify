@@ -6,10 +6,13 @@ const VideoPlayer = ({ videoUrl, title }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [volume, setVolume] = useState(1);
+  const [isMuted, setIsMuted] = useState(false);
   const [bufferedPercent, setBufferedPercent] = useState(0);
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [networkState, setNetworkState] = useState("UNKNOWN");
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   const localStorageKey = `videoTime_${videoUrl}`;
 
@@ -17,7 +20,7 @@ const VideoPlayer = ({ videoUrl, title }) => {
     const video = videoRef.current;
     if (!video) return;
 
-    console.log('Video URL:', videoUrl); // Debug log
+    console.log('Video URL:', videoUrl);
 
     const networkStates = ["EMPTY", "IDLE", "LOADING", "NO_SOURCE"];
 
@@ -34,6 +37,9 @@ const VideoPlayer = ({ videoUrl, title }) => {
       if (!isNaN(savedTime)) {
         video.currentTime = savedTime;
       }
+      // Set initial volume
+      video.volume = volume;
+      video.muted = isMuted;
     };
 
     const handleCanPlay = () => {
@@ -72,6 +78,10 @@ const VideoPlayer = ({ videoUrl, title }) => {
       setNetworkState(networkStates[state] || "UNKNOWN");
     };
 
+    const handleFullscreenChange = () => {
+      setIsFullscreen(document.fullscreenElement !== null);
+    };
+
     // Event listeners
     video.addEventListener("loadstart", handleLoadStart);
     video.addEventListener("loadedmetadata", handleLoadedMetadata);
@@ -82,6 +92,7 @@ const VideoPlayer = ({ videoUrl, title }) => {
     video.addEventListener("error", handleError);
     video.addEventListener("stalled", handleNetworkChange);
     video.addEventListener("waiting", handleNetworkChange);
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
 
     return () => {
       video.removeEventListener("loadstart", handleLoadStart);
@@ -93,8 +104,9 @@ const VideoPlayer = ({ videoUrl, title }) => {
       video.removeEventListener("error", handleError);
       video.removeEventListener("stalled", handleNetworkChange);
       video.removeEventListener("waiting", handleNetworkChange);
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
     };
-  }, [videoUrl]);
+  }, [videoUrl, volume, isMuted]);
 
   const togglePlay = () => {
     const video = videoRef.current;
@@ -111,8 +123,48 @@ const VideoPlayer = ({ videoUrl, title }) => {
         });
       }
     }
-
     setIsPlaying(!isPlaying);
+  };
+
+  const handleVolumeChange = (e) => {
+    const newVolume = parseFloat(e.target.value);
+    setVolume(newVolume);
+    if (videoRef.current) {
+      videoRef.current.volume = newVolume;
+      setIsMuted(newVolume === 0);
+    }
+  };
+
+  const toggleMute = () => {
+    if (videoRef.current) {
+      const newMuted = !isMuted;
+      videoRef.current.muted = newMuted;
+      setIsMuted(newMuted);
+      if (newMuted) {
+        setVolume(0);
+      } else {
+        setVolume(1);
+      }
+    }
+  };
+
+  const handleSeek = (e) => {
+    const seekTime = parseFloat(e.target.value);
+    setCurrentTime(seekTime);
+    if (videoRef.current) {
+      videoRef.current.currentTime = seekTime;
+    }
+  };
+
+  const toggleFullscreen = () => {
+    const videoContainer = videoRef.current.parentElement;
+    if (!document.fullscreenElement) {
+      videoContainer.requestFullscreen().catch(err => {
+        console.error(`Error attempting to enable fullscreen: ${err.message}`);
+      });
+    } else {
+      document.exitFullscreen();
+    }
   };
 
   const formatTime = (time) => {
@@ -150,14 +202,43 @@ const VideoPlayer = ({ videoUrl, title }) => {
       />
 
       <div className="video-controls">
-        <button onClick={togglePlay} className="play-toggle">
-          {isPlaying ? "⏸ Pause" : "▶ Play"}
-        </button>
-        <div className="time-info">
-          {formatTime(currentTime)} / {formatTime(duration)}
+        <div className="control-group">
+          <button onClick={togglePlay} className="control-button">
+            {isPlaying ? "⏸" : "▶"}
+          </button>
+          <div className="time-display">
+            {formatTime(currentTime)} / {formatTime(duration)}
+          </div>
         </div>
-        <div className="buffer-progress">
+
+        <div className="progress-container">
+          <input
+            type="range"
+            min="0"
+            max={duration || 0}
+            value={currentTime}
+            onChange={handleSeek}
+            className="progress-bar"
+          />
           <div className="buffer-bar" style={{ width: `${bufferedPercent}%` }} />
+        </div>
+
+        <div className="control-group">
+          <button onClick={toggleMute} className="control-button">
+            {isMuted ? "🔇" : volume > 0.5 ? "🔊" : "🔉"}
+          </button>
+          <input
+            type="range"
+            min="0"
+            max="1"
+            step="0.1"
+            value={volume}
+            onChange={handleVolumeChange}
+            className="volume-slider"
+          />
+          <button onClick={toggleFullscreen} className="control-button">
+            {isFullscreen ? "⤓" : "⤢"}
+          </button>
         </div>
       </div>
 

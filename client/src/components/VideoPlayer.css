@@ -15,10 +15,104 @@
   display: block;
   object-fit: cover;
   background: #000;
-  will-change: transform;
-  backface-visibility: hidden;
-  transform: translateZ(0);
-  -webkit-transform: translateZ(0);
+}
+
+.video-controls {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.video-player:hover .video-controls {
+  opacity: 1;
+}
+
+.control-group {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.control-button {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.control-button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.time-display {
+  color: white;
+  font-size: 0.9rem;
+  font-family: monospace;
+}
+
+.progress-container {
+  position: relative;
+  width: 100%;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 2px;
+  cursor: pointer;
+}
+
+.progress-bar {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+  z-index: 2;
+}
+
+.progress-bar::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 12px;
+  height: 12px;
+  background: white;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.buffer-bar {
+  position: absolute;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.4);
+  border-radius: 2px;
+  z-index: 1;
+}
+
+.volume-slider {
+  width: 80px;
+  height: 4px;
+  -webkit-appearance: none;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 2px;
+  outline: none;
+}
+
+.volume-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 12px;
+  height: 12px;
+  background: white;
+  border-radius: 50%;
+  cursor: pointer;
 }
 
 .loading {
@@ -44,6 +138,7 @@
   border-radius: 8px;
   text-align: center;
   max-width: 80%;
+  z-index: 10;
 }
 
 .error-message button {
@@ -59,6 +154,28 @@
 
 .error-message button:hover {
   background: #f0f0f0;
+}
+
+.video-title {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  padding: 1rem;
+  background: linear-gradient(rgba(0, 0, 0, 0.7), transparent);
+  color: white;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.video-player:hover .video-title {
+  opacity: 1;
+}
+
+.video-title h2 {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 500;
 }
 
 .video-info {
@@ -88,12 +205,6 @@
   right: 0;
   height: 4px;
   background: rgba(255, 255, 255, 0.2);
-}
-
-.buffer-bar {
-  height: 100%;
-  background: rgba(255, 255, 255, 0.4);
-  transition: width 0.3s ease;
 }
 
 /* Custom video controls */

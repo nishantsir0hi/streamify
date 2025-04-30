@@ -32,7 +32,7 @@ export const uploadMovie = async (title, file, thumbnail) => {
     formData.append("file", file);
     formData.append("thumbnail", thumbnail);
 
-    const uploadUrl = `${API_BASE_URL}/api/movies/upload`;
+    const uploadUrl = `${API_BASE_URL}/upload`;
     console.log("⏫ Uploading movie to:", uploadUrl);
 
     await axios.post(uploadUrl, formData, {

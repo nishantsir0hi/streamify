@@ -69,7 +69,7 @@ const HomePage = () => {
         <section className="movie-row">
           <h2 className="movie-row-title">Trending Now</h2>
           <div className="movie-grid">
-            {movies.slice(0, 5).map((movie) => (
+            {movies.map((movie) => (
               <div key={movie._id} className="movie-card">
                 <img
                   src={`https://img.youtube.com/vi/${movie.url.split('/').pop()}/maxresdefault.jpg`}

@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { uploadMovie, getMovies, deleteMovie } from "../services/movieService";
-import VideoPlayer from "../components/VideoPlayer";
 
 const AdminDashboard = () => {
   const [movies, setMovies] = useState([]);
@@ -102,19 +101,21 @@ const AdminDashboard = () => {
       ) : movies.length === 0 ? (
         <div className="text-center text-gray-400">No movies uploaded yet.</div>
       ) : (
-        <div className="space-y-6">
+        <div className="space-y-4">
           {movies.map((movie) => (
-            <div key={movie._id} className="bg-gray-800 p-4 rounded shadow">
-              <h3 className="text-xl font-bold mb-2">{movie.title}</h3>
-              <VideoPlayer videoUrl={movie.url} title={movie.title} />
-              <div className="flex justify-end mt-3">
-                <button
-                  onClick={() => handleDelete(movie._id)}
-                  className="px-4 py-2 bg-red-500 hover:bg-red-700 rounded"
-                >
-                  Delete
-                </button>
+            <div key={movie._id} className="bg-gray-800 p-4 rounded shadow flex justify-between items-center">
+              <div>
+                <h3 className="text-xl font-bold">{movie.title}</h3>
+                <p className="text-gray-400 text-sm">
+                  {new Date(movie.createdAt).toLocaleDateString()}
+                </p>
               </div>
+              <button
+                onClick={() => handleDelete(movie._id)}
+                className="px-4 py-2 bg-red-500 hover:bg-red-700 rounded"
+              >
+                Delete
+              </button>
             </div>
           ))}
         </div>

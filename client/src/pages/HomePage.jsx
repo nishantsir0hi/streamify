@@ -6,6 +6,7 @@ import './HomePage.css';
 const HomePage = () => {
   const [movies, setMovies] = useState([]);
   const [featuredMovie, setFeaturedMovie] = useState(null);
+  const [selectedMovie, setSelectedMovie] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -30,6 +31,10 @@ const HomePage = () => {
     fetchMovies();
   }, []);
 
+  const handleMovieClick = (movie) => {
+    setSelectedMovie(movie);
+  };
+
   if (loading) {
     return (
       <div className="loading-container">
@@ -48,8 +53,23 @@ const HomePage = () => {
 
   return (
     <div className="home-container">
+      {/* Video Player Section */}
+      {selectedMovie && (
+        <div className="video-player-section">
+          <div className="video-player-container">
+            <VideoPlayer videoUrl={selectedMovie.url} title={selectedMovie.title} />
+            <button 
+              className="close-button"
+              onClick={() => setSelectedMovie(null)}
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Hero Section */}
-      {featuredMovie && (
+      {featuredMovie && !selectedMovie && (
         <div className="hero-section">
           <div className="hero-overlay" />
           <VideoPlayer videoUrl={featuredMovie.url} title={featuredMovie.title} />
@@ -70,7 +90,11 @@ const HomePage = () => {
           <h2 className="movie-row-title">Trending Now</h2>
           <div className="movie-grid">
             {movies.map((movie) => (
-              <div key={movie._id} className="movie-card">
+              <div 
+                key={movie._id} 
+                className="movie-card"
+                onClick={() => handleMovieClick(movie)}
+              >
                 <img
                   src={`https://img.youtube.com/vi/${movie.url.split('/').pop()}/maxresdefault.jpg`}
                   alt={movie.title}
@@ -89,7 +113,11 @@ const HomePage = () => {
           <h2 className="movie-row-title">Continue Watching</h2>
           <div className="movie-grid">
             {movies.slice(5, 10).map((movie) => (
-              <div key={movie._id} className="movie-card">
+              <div 
+                key={movie._id} 
+                className="movie-card"
+                onClick={() => handleMovieClick(movie)}
+              >
                 <img
                   src={`https://img.youtube.com/vi/${movie.url.split('/').pop()}/maxresdefault.jpg`}
                   alt={movie.title}
@@ -108,7 +136,11 @@ const HomePage = () => {
           <h2 className="movie-row-title">Popular on Streamify</h2>
           <div className="movie-grid">
             {movies.slice(10, 15).map((movie) => (
-              <div key={movie._id} className="movie-card">
+              <div 
+                key={movie._id} 
+                className="movie-card"
+                onClick={() => handleMovieClick(movie)}
+              >
                 <img
                   src={`https://img.youtube.com/vi/${movie.url.split('/').pop()}/maxresdefault.jpg`}
                   alt={movie.title}

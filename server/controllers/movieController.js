@@ -142,8 +142,15 @@ export const uploadMovie = (req, res) => {
 
     try {
       if (!req.files || !req.files.file || !req.files.thumbnail) {
-        console.error('Missing required files');
-        return res.status(400).json({ message: 'Both video and thumbnail files are required' });
+        console.error('Missing required files:', {
+          hasFiles: !!req.files,
+          hasVideo: req.files?.file ? true : false,
+          hasThumbnail: req.files?.thumbnail ? true : false
+        });
+        return res.status(400).json({ 
+          message: 'Both video and thumbnail files are required',
+          error: 'MISSING_FILES'
+        });
       }
 
       if (!req.body.title || req.body.title.trim() === '') {
@@ -245,27 +252,53 @@ export const handleDeleteMovie = async (req, res) => {
     const movie = await Movie.findById(req.params.id);
     
     if (!movie) {
+      console.log('Movie not found:', req.params.id);
       return res.status(404).json({ message: 'Movie not found' });
     }
 
-    // Delete the file from the uploads directory
-    const filePath = path.join(uploadsDir, movie.filename);
-    if (fs.existsSync(filePath)) {
-      await fs.promises.unlink(filePath);
-      console.log('Deleted file:', filePath);
+    // Delete the video file from the uploads directory
+    const videoPath = path.join(uploadsDir, movie.filename);
+    const thumbnailPath = path.join(uploadsDir, movie.thumbnail);
+    
+    try {
+      if (fs.existsSync(videoPath)) {
+        await fs.promises.unlink(videoPath);
+        console.log('Deleted video file:', videoPath);
+      } else {
+        console.warn('Video file not found:', videoPath);
+      }
+
+      if (fs.existsSync(thumbnailPath)) {
+        await fs.promises.unlink(thumbnailPath);
+        console.log('Deleted thumbnail file:', thumbnailPath);
+      } else {
+        console.warn('Thumbnail file not found:', thumbnailPath);
+      }
+    } catch (fileError) {
+      console.error('Error deleting files:', fileError);
+      // Continue with database deletion even if file deletion fails
     }
 
     // Delete the movie from the database
     await Movie.findByIdAndDelete(req.params.id);
-    console.log('Movie deleted from database');
+    console.log('Movie deleted from database:', req.params.id);
     
-    res.json({ message: 'Movie deleted successfully' });
+    res.json({ 
+      message: 'Movie deleted successfully',
+      details: {
+        id: req.params.id,
+        title: movie.title
+      }
+    });
   } catch (error) {
-    console.error('Error deleting movie:', error);
+    console.error('Error deleting movie:', {
+      id: req.params.id,
+      error: error.message,
+      stack: error.stack
+    });
     res.status(500).json({ 
       message: 'Error deleting movie',
-      error: error.message,
-      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
     });
   }
 };

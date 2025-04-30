@@ -53,13 +53,45 @@ app.use((err, req, res, next) => {
     path: req.path,
     method: req.method,
     body: req.body,
-    files: req.files
+    files: req.files,
+    headers: req.headers,
+    query: req.query,
+    params: req.params,
+    timestamp: new Date().toISOString()
   });
   
+  // Handle specific error types
+  if (err.name === 'MulterError') {
+    return res.status(400).json({
+      error: 'File Upload Error',
+      message: err.message,
+      code: err.code,
+      field: err.field
+    });
+  }
+
+  if (err.name === 'ValidationError') {
+    return res.status(400).json({
+      error: 'Validation Error',
+      message: err.message,
+      details: err.errors
+    });
+  }
+
+  if (err.name === 'MongoError') {
+    return res.status(500).json({
+      error: 'Database Error',
+      message: 'An error occurred while accessing the database',
+      code: err.code
+    });
+  }
+
+  // Default error response
   res.status(500).json({ 
     error: 'Internal Server Error',
     message: err.message,
-    details: process.env.NODE_ENV === 'development' ? err.stack : undefined
+    details: process.env.NODE_ENV === 'development' ? err.stack : undefined,
+    timestamp: new Date().toISOString()
   });
 });
 

@@ -13,6 +13,8 @@ const VideoPlayer = ({ videoUrl, title }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [networkState, setNetworkState] = useState("UNKNOWN");
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
+  const MAX_RETRIES = 3;
 
   const localStorageKey = `videoTime_${videoUrl}`;
 
@@ -68,7 +70,33 @@ const VideoPlayer = ({ videoUrl, title }) => {
     const handleError = (e) => {
       const err = e?.target?.error;
       console.error('Video error:', err);
-      setError(`Video error: ${err?.message || "Unknown error"}`);
+      
+      let errorMessage = "Unknown error";
+      if (err) {
+        switch (err.code) {
+          case MediaError.MEDIA_ERR_ABORTED:
+            errorMessage = "Video playback was aborted";
+            break;
+          case MediaError.MEDIA_ERR_NETWORK:
+            errorMessage = "Network error occurred while loading the video";
+            break;
+          case MediaError.MEDIA_ERR_DECODE:
+            errorMessage = "Video decoding failed";
+            break;
+          case MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED:
+            errorMessage = "Video format is not supported";
+            break;
+          default:
+            errorMessage = err.message || "Failed to load video";
+        }
+      }
+      
+      setError({
+        message: errorMessage,
+        code: err?.code,
+        networkState: networkState,
+        url: videoUrl
+      });
       setIsLoading(false);
     };
 
@@ -173,14 +201,45 @@ const VideoPlayer = ({ videoUrl, title }) => {
     return `${minutes}:${seconds.toString().padStart(2, "0")}`;
   };
 
+  const handleRetry = () => {
+    if (retryCount < MAX_RETRIES) {
+      setRetryCount(prev => prev + 1);
+      setError(null);
+      setIsLoading(true);
+      if (videoRef.current) {
+        videoRef.current.load();
+        videoRef.current.play().catch(err => {
+          console.error("Retry play error:", err);
+          setError({
+            message: "Failed to play video after retry",
+            code: err.code,
+            networkState: networkState,
+            url: videoUrl
+          });
+        });
+      }
+    } else {
+      setError({
+        message: "Maximum retry attempts reached. Please try again later.",
+        code: "MAX_RETRIES",
+        networkState: networkState,
+        url: videoUrl
+      });
+    }
+  };
+
   return (
     <div className="video-player">
       {error && (
         <div className="error-message">
-          <p>{error}</p>
-          <p>Network: {networkState}</p>
-          <p>URL: {videoUrl}</p>
-          <button onClick={() => window.location.reload()}>Retry</button>
+          <p>{error.message}</p>
+          <p>Network: {error.networkState}</p>
+          <p>URL: {error.url}</p>
+          {retryCount < MAX_RETRIES ? (
+            <button onClick={handleRetry}>Retry ({MAX_RETRIES - retryCount} attempts left)</button>
+          ) : (
+            <button onClick={() => window.location.reload()}>Reload Page</button>
+          )}
         </div>
       )}
 

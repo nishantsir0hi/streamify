@@ -1,8 +1,8 @@
 import axios from "axios";
 
-// Base API URL - using Render deployment URL
-const API_BASE_URL = "https://streamify-2.onrender.com/api/movies";
-console.log("📡 API URL:", API_BASE_URL); // Debug log
+// Base API URL - using environment variable with fallback
+const API_BASE_URL = import.meta.env.VITE_API_URL || "https://streamify-2.onrender.com/api/movies";
+console.log("📡 API URL:", API_BASE_URL);
 
 /**
  * Get all movies.
@@ -10,7 +10,9 @@ console.log("📡 API URL:", API_BASE_URL); // Debug log
  */
 export const getMovies = async () => {
   try {
+    console.log("📥 Fetching movies from:", API_BASE_URL);
     const response = await axios.get(API_BASE_URL);
+    console.log("✅ Movies fetched:", response.data);
     return response.data;
   } catch (error) {
     console.error("❌ Failed to fetch movies:", error.message, error.response?.data);

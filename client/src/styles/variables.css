@@ -1,0 +1,39 @@
+:root {
+  /* Colors */
+  --netflix-black: #141414;
+  --netflix-dark-gray: #181818;
+  --netflix-light-gray: #2f2f2f;
+  --netflix-white: #ffffff;
+  --netflix-red: #e50914;
+  --netflix-red-hover: #f40612;
+  
+  /* Typography */
+  --font-family: 'Netflix Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  
+  /* Spacing */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  
+  /* Border Radius */
+  --border-radius-sm: 4px;
+  --border-radius-md: 8px;
+  --border-radius-lg: 12px;
+  
+  /* Transitions */
+  --transition-fast: 0.2s ease;
+  --transition-normal: 0.3s ease;
+  --transition-slow: 0.5s ease;
+  
+  /* Shadows */
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.2);
+  --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.3);
+  
+  /* Z-index */
+  --z-index-navbar: 1000;
+  --z-index-modal: 2000;
+  --z-index-tooltip: 3000;
+} 

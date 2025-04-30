@@ -145,10 +145,14 @@ export const getMovies = async (req, res) => {
       ? 'https://streamify-2.onrender.com' 
       : 'http://localhost:5001';
     
-    const moviesWithUrls = movies.map(movie => ({
-      ...movie.toObject(),
-      url: `${baseUrl}/uploads/${movie.filename}`
-    }));
+    const moviesWithUrls = movies.map(movie => {
+      const url = `${baseUrl}/uploads/${movie.filename}`;
+      console.log('Generated URL for movie:', { title: movie.title, url });
+      return {
+        ...movie.toObject(),
+        url
+      };
+    });
     
     res.json(moviesWithUrls);
   } catch (error) {

@@ -24,9 +24,11 @@ const VideoPlayer = ({ videoUrl, title }) => {
     const handleLoadStart = () => {
       setIsLoading(true);
       setError(null);
+      console.log('Video loading started');
     };
 
     const handleLoadedMetadata = () => {
+      console.log('Video metadata loaded');
       setDuration(video.duration || 0);
       const savedTime = parseFloat(localStorage.getItem(localStorageKey));
       if (!isNaN(savedTime)) {
@@ -34,8 +36,15 @@ const VideoPlayer = ({ videoUrl, title }) => {
       }
     };
 
-    const handleCanPlay = () => setIsLoading(false);
-    const handlePlaying = () => setIsLoading(false);
+    const handleCanPlay = () => {
+      console.log('Video can play');
+      setIsLoading(false);
+    };
+
+    const handlePlaying = () => {
+      console.log('Video playing');
+      setIsLoading(false);
+    };
 
     const handleTimeUpdate = () => {
       setCurrentTime(video.currentTime);
@@ -52,12 +61,14 @@ const VideoPlayer = ({ videoUrl, title }) => {
 
     const handleError = (e) => {
       const err = e?.target?.error;
+      console.error('Video error:', err);
       setError(`Video error: ${err?.message || "Unknown error"}`);
       setIsLoading(false);
     };
 
     const handleNetworkChange = () => {
       const state = video.networkState;
+      console.log('Network state changed:', networkStates[state] || "UNKNOWN");
       setNetworkState(networkStates[state] || "UNKNOWN");
     };
 
@@ -116,11 +127,12 @@ const VideoPlayer = ({ videoUrl, title }) => {
         <div className="error-message">
           <p>{error}</p>
           <p>Network: {networkState}</p>
+          <p>URL: {videoUrl}</p>
           <button onClick={() => window.location.reload()}>Retry</button>
         </div>
       )}
 
-      {isLoading && <div className="loading">Loading...</div>}
+      {isLoading && <div className="loading">Loading video...</div>}
 
       <video
         ref={videoRef}

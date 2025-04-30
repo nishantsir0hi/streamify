@@ -1,7 +1,7 @@
 import axios from "axios";
 
-// Base API URL
-const API_BASE_URL = "http://localhost:5001/api/movies";
+// Base API URL - using Render deployment URL
+const API_BASE_URL = "https://streamify-2.onrender.com/api/movies";
 console.log("📡 API URL:", API_BASE_URL); // Debug log
 
 /**

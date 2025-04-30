@@ -289,9 +289,7 @@ export const getMovies = async (req, res) => {
     console.log(`Found ${movies.length} movies`);
     
     // Add full URLs to the response
-    const baseUrl = process.env.NODE_ENV === 'production' 
-      ? 'https://streamify-2.onrender.com' 
-      : 'http://localhost:5001';
+    const baseUrl = 'https://streamify-2.onrender.com';
     
     const moviesWithUrls = movies.map(movie => {
       const url = `${baseUrl}/uploads/${movie.filename}`;

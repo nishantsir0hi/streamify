@@ -9,8 +9,7 @@ const VideoPlayer = ({ videoUrl, title }) => {
   const [bufferedPercent, setBufferedPercent] = useState(0);
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [canPlay, setCanPlay] = useState(false);
-  const [networkState, setNetworkState] = useState(null);
+  const [networkState, setNetworkState] = useState("UNKNOWN");
 
   const localStorageKey = `videoTime_${videoUrl}`;
 
@@ -18,7 +17,7 @@ const VideoPlayer = ({ videoUrl, title }) => {
     const video = videoRef.current;
     if (!video) return;
 
-    const states = ['NETWORK_EMPTY', 'NETWORK_IDLE', 'NETWORK_LOADING', 'NETWORK_NO_SOURCE'];
+    const networkStates = ["EMPTY", "IDLE", "LOADING", "NO_SOURCE"];
 
     const handleLoadStart = () => {
       setIsLoading(true);
@@ -26,21 +25,15 @@ const VideoPlayer = ({ videoUrl, title }) => {
     };
 
     const handleLoadedMetadata = () => {
-      setDuration(video.duration);
+      setDuration(video.duration || 0);
       const savedTime = parseFloat(localStorage.getItem(localStorageKey));
       if (!isNaN(savedTime)) {
         video.currentTime = savedTime;
       }
     };
 
-    const handleCanPlay = () => {
-      setCanPlay(true);
-      setIsLoading(false);
-    };
-
-    const handlePlaying = () => {
-      setIsLoading(false);
-    };
+    const handleCanPlay = () => setIsLoading(false);
+    const handlePlaying = () => setIsLoading(false);
 
     const handleTimeUpdate = () => {
       setCurrentTime(video.currentTime);
@@ -50,19 +43,20 @@ const VideoPlayer = ({ videoUrl, title }) => {
     const handleProgress = () => {
       if (video.buffered.length > 0) {
         const bufferedEnd = video.buffered.end(video.buffered.length - 1);
-        setBufferedPercent((bufferedEnd / video.duration) * 100);
+        const percent = (bufferedEnd / video.duration) * 100;
+        setBufferedPercent(isNaN(percent) ? 0 : percent);
       }
     };
 
     const handleError = (e) => {
       const err = e?.target?.error;
-      console.error("Video error:", err);
-      setError(`Video playback error: ${err?.message || 'Unknown error'}`);
+      setError(`Video error: ${err?.message || "Unknown error"}`);
       setIsLoading(false);
     };
 
     const handleNetworkChange = () => {
-      setNetworkState(states[video.networkState] || "UNKNOWN");
+      const state = video.networkState;
+      setNetworkState(networkStates[state] || "UNKNOWN");
     };
 
     // Event listeners
@@ -100,7 +94,7 @@ const VideoPlayer = ({ videoUrl, title }) => {
       if (playPromise !== undefined) {
         playPromise.catch(err => {
           console.error("Play error:", err);
-          setError("Unable to play video. Try again.");
+          setError("Unable to play the video. Try again.");
         });
       }
     }
@@ -119,35 +113,38 @@ const VideoPlayer = ({ videoUrl, title }) => {
       {error && (
         <div className="error-message">
           <p>{error}</p>
-          {networkState && <p>Network State: {networkState}</p>}
+          <p>Network: {networkState}</p>
           <button onClick={() => window.location.reload()}>Retry</button>
         </div>
       )}
 
-      {isLoading && !canPlay && <div className="loading">Loading video...</div>}
+      {isLoading && <div className="loading">Loading...</div>}
 
       <video
         ref={videoRef}
         src={videoUrl}
-        controls
         preload="auto"
         playsInline
         crossOrigin="anonymous"
-        className="video-element"
         onPlay={() => setIsPlaying(true)}
         onPause={() => setIsPlaying(false)}
+        className="video-element"
       />
 
-      <div className="video-info">
-        <h2>{title}</h2>
+      <div className="video-controls">
+        <button onClick={togglePlay} className="play-toggle">
+          {isPlaying ? "⏸ Pause" : "▶ Play"}
+        </button>
         <div className="time-info">
-          <span>{formatTime(currentTime)}</span>
-          <span> / </span>
-          <span>{formatTime(duration)}</span>
+          {formatTime(currentTime)} / {formatTime(duration)}
         </div>
         <div className="buffer-progress">
           <div className="buffer-bar" style={{ width: `${bufferedPercent}%` }} />
         </div>
+      </div>
+
+      <div className="video-title">
+        <h2>{title}</h2>
       </div>
     </div>
   );

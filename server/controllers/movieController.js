@@ -111,11 +111,18 @@ const uploadThumbnail = multer({
 export const uploadMovie = (req, res) => {
   console.log('Upload request received:', {
     body: req.body,
-    file: req.file ? {
-      filename: req.file.filename,
-      path: req.file.path,
-      size: req.file.size
-    } : 'No file'
+    files: req.files ? {
+      video: req.files.file ? {
+        filename: req.files.file[0].filename,
+        path: req.files.file[0].path,
+        size: req.files.file[0].size
+      } : 'No video file',
+      thumbnail: req.files.thumbnail ? {
+        filename: req.files.thumbnail[0].filename,
+        path: req.files.thumbnail[0].path,
+        size: req.files.thumbnail[0].size
+      } : 'No thumbnail file'
+    } : 'No files'
   });
   
   upload(req, res, async (err) => {
@@ -134,69 +141,66 @@ export const uploadMovie = (req, res) => {
     }
 
     try {
-      if (!req.file) {
-        console.error('No file received in request');
-        return res.status(400).json({ message: 'No file received' });
+      if (!req.files || !req.files.file || !req.files.thumbnail) {
+        console.error('Missing required files');
+        return res.status(400).json({ message: 'Both video and thumbnail files are required' });
       }
 
       if (!req.body.title || req.body.title.trim() === '') {
-        // Clean up the uploaded file if title is missing
-        await fs.promises.unlink(req.file.path);
+        // Clean up the uploaded files if title is missing
+        if (req.files.file) {
+          await fs.promises.unlink(req.files.file[0].path);
+        }
+        if (req.files.thumbnail) {
+          await fs.promises.unlink(req.files.thumbnail[0].path);
+        }
         return res.status(400).json({ message: 'Movie title is required' });
       }
 
-      // Handle thumbnail upload
-      uploadThumbnail(req, res, async (thumbErr) => {
-        if (thumbErr) {
-          // Clean up the video file if thumbnail upload fails
-          await fs.promises.unlink(req.file.path);
-          return res.status(400).json({ 
-            message: 'Error uploading thumbnail',
-            error: thumbErr.message 
-          });
-        }
-
-        if (!req.file) {
-          // Clean up the video file if no thumbnail is provided
-          await fs.promises.unlink(req.file.path);
-          return res.status(400).json({ message: 'Thumbnail is required' });
-        }
+      console.log('Files uploaded successfully:', req.files);
+      console.log('Creating movie document with title:', req.body.title);
       
-        console.log('File uploaded successfully:', req.file);
-        console.log('Creating movie document with title:', req.body.title);
-        
-        const movie = new Movie({ 
-          title: req.body.title.trim(), 
-          filename: req.file.filename,
-          thumbnail: req.file.filename,
-          originalName: req.file.originalname,
-          size: req.file.size,
-          mimeType: req.file.mimetype
-        });
-        
-        console.log('Saving movie to database...');
-        const savedMovie = await movie.save();
-        console.log('Movie saved successfully:', savedMovie);
-        
-        res.status(201).json({
-          ...savedMovie.toObject(),
-          url: `/uploads/${savedMovie.filename}`,
-          thumbnailUrl: `/uploads/${savedMovie.thumbnail}`
-        });
+      const movie = new Movie({ 
+        title: req.body.title.trim(), 
+        filename: req.files.file[0].filename,
+        thumbnail: req.files.thumbnail[0].filename,
+        originalName: req.files.file[0].originalname,
+        size: req.files.file[0].size,
+        mimeType: req.files.file[0].mimetype
+      });
+      
+      console.log('Saving movie to database...');
+      const savedMovie = await movie.save();
+      console.log('Movie saved successfully:', savedMovie);
+      
+      const baseUrl = process.env.NODE_ENV === 'production' 
+        ? 'https://streamify-2.onrender.com' 
+        : 'http://localhost:5001';
+
+      res.status(201).json({
+        ...savedMovie.toObject(),
+        url: `${baseUrl}/uploads/${savedMovie.filename}`,
+        thumbnailUrl: `${baseUrl}/uploads/${savedMovie.thumbnail}`
       });
     } catch (error) {
       console.error('Error in upload process:', error);
       // Clean up any uploaded files if there's an error
-      if (req.file) {
+      if (req.files) {
         try {
-          await fs.promises.unlink(req.file.path);
+          if (req.files.file) {
+            await fs.promises.unlink(req.files.file[0].path);
+          }
+          if (req.files.thumbnail) {
+            await fs.promises.unlink(req.files.thumbnail[0].path);
+          }
         } catch (unlinkError) {
-          console.error('Error cleaning up file:', unlinkError);
+          console.error('Error cleaning up files:', unlinkError);
         }
       }
       res.status(500).json({ 
         message: 'Error processing upload',
-        error: error.message 
+        error: error.message,
+        details: process.env.NODE_ENV === 'development' ? error.stack : undefined
       });
     }
   });

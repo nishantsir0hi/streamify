@@ -10,10 +10,10 @@ console.log("📡 API URL:", API_BASE_URL); // Debug log
  */
 export const getMovies = async () => {
   try {
-    const response = await axios.get(`${API_BASE_URL}/movies`);
+    const response = await axios.get(`${API_BASE_URL}/api/movies`);
     return response.data;
   } catch (error) {
-    console.error("❌ Failed to fetch movies:", error.message);
+    console.error("❌ Failed to fetch movies:", error.message, error.response?.data);
     throw error;
   }
 };
@@ -32,7 +32,7 @@ export const uploadMovie = async (title, file, thumbnail) => {
     formData.append("file", file);
     formData.append("thumbnail", thumbnail);
 
-    const uploadUrl = `${API_BASE_URL}/movies/upload`;
+    const uploadUrl = `${API_BASE_URL}/api/movies/upload`;
     console.log("⏫ Uploading movie to:", uploadUrl);
 
     await axios.post(uploadUrl, formData, {
@@ -59,7 +59,7 @@ export const uploadMovie = async (title, file, thumbnail) => {
  */
 export const deleteMovie = async (id) => {
   try {
-    await axios.delete(`${API_BASE_URL}/movies/${id}`);
+    await axios.delete(`${API_BASE_URL}/api/movies/${id}`);
     console.log("✅ Movie deleted successfully");
   } catch (error) {
     console.error("❌ Movie deletion failed:", error.message);

@@ -25,7 +25,7 @@ app.use(cors({
   origin: ['https://streamify-xi-blue.vercel.app', 'http://localhost:5173', 'https://streamify-2.onrender.com'],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'Range', 'Accept'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Range', 'Accept', 'Content-Length', 'Content-Range'],
   exposedHeaders: ['Content-Range', 'Content-Length', 'Content-Type', 'Accept-Ranges']
 }));
 

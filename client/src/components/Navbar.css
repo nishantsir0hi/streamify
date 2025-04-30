@@ -28,11 +28,18 @@
   height: 45px;
   cursor: pointer;
   transition: transform var(--transition-fast);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.5rem;
+}
+
+.logo-text {
   text-transform: uppercase;
   color: var(--netflix-red);
-  font-weight: 700;
-  font-size: 1.5rem;
-  text-decoration: none;
+  font-weight: 900;
+  letter-spacing: 0.5px;
 }
 
 .logo:hover {

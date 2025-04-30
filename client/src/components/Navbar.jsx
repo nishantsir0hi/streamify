@@ -23,7 +23,7 @@ const Navbar = () => {
     <nav className={`navbar ${isScrolled ? 'scrolled' : ''}`}>
       <div className="navbar-container">
         <Link to="/" className="logo">
-          STREAMIFY
+          <span className="logo-text">STREAMIFY</span>
         </Link>
         <div className="nav-links">
           <Link 

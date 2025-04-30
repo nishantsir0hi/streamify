@@ -1,12 +1,8 @@
 import { useRef, useEffect, useState } from "react";
 import "./VideoPlayer.css";
 
-const VideoPlayer = ({ videoUrl, title }) => {
-  <video
-  src="https://www.w3schools.com/html/mov_bbb.mp4"
-  controls
-/>
 
+const VideoPlayer = ({ videoUrl, title }) => {
   const videoRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);

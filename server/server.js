@@ -17,7 +17,7 @@ const PORT = process.env.PORT || 5001;
 
 // Create uploads directory if it doesn't exist
 if (!fs.existsSync(path.join(__dirname, 'uploads'))) {
-  fs.mkdirSync(path.join(__dirname, 'uploads'));
+  fs.mkdirSync(path.join(__dirname, 'uploads'), { recursive: true });
 }
 
 // Middleware
@@ -28,7 +28,10 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization', 'Range', 'Accept'],
   exposedHeaders: ['Content-Range', 'Content-Length', 'Content-Type', 'Accept-Ranges']
 }));
-app.use(express.json());
+
+// Increase payload size limit for file uploads
+app.use(express.json({ limit: '1000mb' }));
+app.use(express.urlencoded({ extended: true, limit: '1000mb' }));
 
 // Configure static file serving for videos
 app.use('/uploads', (req, res, next) => {

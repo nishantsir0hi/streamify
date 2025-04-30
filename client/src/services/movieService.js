@@ -32,16 +32,22 @@ export const uploadMovie = async (title, file, thumbnail) => {
     formData.append("file", file);
     formData.append("thumbnail", thumbnail);
 
-    const uploadUrl = `${API_BASE_URL}/upload`;
+    const uploadUrl = `${API_BASE_URL}/movies/upload`;
     console.log("⏫ Uploading movie to:", uploadUrl);
 
     await axios.post(uploadUrl, formData, {
-      headers: { "Content-Type": "multipart/form-data" },
+      headers: { 
+        "Content-Type": "multipart/form-data"
+      },
+      onUploadProgress: (progressEvent) => {
+        const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+        console.log(`Upload Progress: ${percentCompleted}%`);
+      }
     });
 
     console.log("✅ Movie uploaded successfully");
   } catch (error) {
-    console.error("❌ Movie upload failed:", error.message);
+    console.error("❌ Movie upload failed:", error.message, error.response?.data);
     throw error;
   }
 };

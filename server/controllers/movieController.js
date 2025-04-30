@@ -27,36 +27,57 @@ const storage = multer.diskStorage({
 const upload = multer({
   storage: storage,
   limits: { 
-    fileSize: 1000000000, // 1GB
-    files: 1
+    fileSize: 2000000000, // 2GB
+    files: 2 // Allow both video and thumbnail
   },
   fileFilter: (req, file, cb) => {
     console.log('File upload attempt:', {
       originalname: file.originalname,
       mimetype: file.mimetype,
-      size: file.size
+      size: file.size,
+      fieldname: file.fieldname
     });
 
-    // Check file extension
-    const filetypes = /\.(mp4|mov|avi|mkv)$/i;
-    const extname = filetypes.test(path.extname(file.originalname));
-    
-    // Check MIME type
-    const mimetypes = /^video\//;
-    const mimetype = mimetypes.test(file.mimetype);
+    if (file.fieldname === 'file') {
+      // Check video file
+      const filetypes = /\.(mp4|mov|avi|mkv)$/i;
+      const extname = filetypes.test(path.extname(file.originalname));
+      const mimetype = /^video\//.test(file.mimetype);
 
-    if (extname && mimetype) {
-      console.log('File accepted:', file.originalname);
-      return cb(null, true);
+      if (extname && mimetype) {
+        console.log('Video file accepted:', file.originalname);
+        return cb(null, true);
+      } else {
+        console.log('Video file rejected:', {
+          filename: file.originalname,
+          reason: !extname ? 'Invalid file extension' : 'Invalid MIME type'
+        });
+        return cb(new Error('Only video files (MP4, MOV, AVI, MKV) are allowed'));
+      }
+    } else if (file.fieldname === 'thumbnail') {
+      // Check thumbnail file
+      const filetypes = /\.(jpg|jpeg|png|webp)$/i;
+      const extname = filetypes.test(path.extname(file.originalname));
+      const mimetype = /^image\//.test(file.mimetype);
+
+      if (extname && mimetype) {
+        console.log('Thumbnail file accepted:', file.originalname);
+        return cb(null, true);
+      } else {
+        console.log('Thumbnail file rejected:', {
+          filename: file.originalname,
+          reason: !extname ? 'Invalid file extension' : 'Invalid MIME type'
+        });
+        return cb(new Error('Only image files (JPG, JPEG, PNG, WEBP) are allowed'));
+      }
     } else {
-      console.log('File rejected:', {
-        filename: file.originalname,
-        reason: !extname ? 'Invalid file extension' : 'Invalid MIME type'
-      });
-      return cb(new Error('Only video files (MP4, MOV, AVI, MKV) are allowed'));
+      return cb(new Error('Invalid field name'));
     }
   }
-}).single('file');
+}).fields([
+  { name: 'file', maxCount: 1 },
+  { name: 'thumbnail', maxCount: 1 }
+]);
 
 const thumbnailStorage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -102,7 +123,7 @@ export const uploadMovie = (req, res) => {
       console.error('Upload error:', err);
       if (err.code === 'LIMIT_FILE_SIZE') {
         return res.status(400).json({ 
-          message: 'File size too large. Maximum size is 1GB',
+          message: 'File size too large. Maximum size is 2GB',
           error: err.message 
         });
       }

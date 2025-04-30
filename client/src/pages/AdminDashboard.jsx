@@ -12,12 +12,11 @@ const AdminDashboard = () => {
   const fetchMovies = async () => {
     try {
       setLoading(true);
-      setError(null);
       const data = await getMovies();
       setMovies(data);
     } catch (err) {
-      setError("Failed to fetch movies. Please check the console for details.");
-      console.error("Error in fetchMovies:", err);
+      setError("Failed to fetch movies. Check the console for details.");
+      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -25,31 +24,35 @@ const AdminDashboard = () => {
 
   const handleUpload = async (e) => {
     e.preventDefault();
-    if (!file || !title) return;
+    if (!file || !title.trim()) {
+      setError("Both title and file are required.");
+      return;
+    }
+
     try {
       setLoading(true);
-      setError(null);
-      await uploadMovie(title, file);
+      await uploadMovie(title.trim(), file);
       setTitle("");
       setFile(null);
       await fetchMovies();
     } catch (err) {
-      setError("Failed to upload movie. Please check the console for details.");
-      console.error("Error in handleUpload:", err);
+      setError("Upload failed. Check the console for details.");
+      console.error(err);
     } finally {
       setLoading(false);
     }
   };
 
   const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this movie?")) return;
+
     try {
       setLoading(true);
-      setError(null);
       await deleteMovie(id);
       await fetchMovies();
     } catch (err) {
-      setError("Failed to delete movie. Please check the console for details.");
-      console.error("Error in handleDelete:", err);
+      setError("Deletion failed. Check the console for details.");
+      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -60,51 +63,54 @@ const AdminDashboard = () => {
   }, []);
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="max-w-4xl mx-auto p-4 text-white">
+      <h1 className="text-3xl font-bold mb-6">Admin Dashboard</h1>
+
       {error && (
-        <div className="mb-4 p-4 bg-red-500 text-white rounded">
+        <div className="mb-4 p-4 bg-red-600 rounded shadow">
           {error}
         </div>
       )}
-      
-      <form onSubmit={handleUpload} className="flex flex-col gap-4 mb-8">
+
+      <form onSubmit={handleUpload} className="space-y-4 mb-8 bg-gray-900 p-4 rounded shadow">
         <input
           type="text"
           placeholder="Movie title"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          className="p-2 rounded bg-gray-700 focus:outline-none"
+          className="w-full p-2 rounded bg-gray-700 focus:outline-none"
         />
         <input
           type="file"
           onChange={(e) => setFile(e.target.files[0])}
           accept="video/mp4"
-          className="p-2 bg-gray-700 rounded"
+          className="w-full p-2 bg-gray-700 rounded"
         />
         <button
           type="submit"
           disabled={loading}
-          className="p-3 bg-pink-600 rounded hover:bg-pink-700"
+          className="w-full p-3 bg-pink-600 rounded hover:bg-pink-700 disabled:opacity-50"
         >
           {loading ? "Uploading..." : "Upload Movie"}
         </button>
       </form>
 
       <h2 className="text-2xl font-semibold mb-4">Uploaded Movies</h2>
-      {loading ? (
+
+      {loading && movies.length === 0 ? (
         <div className="text-center">Loading movies...</div>
       ) : movies.length === 0 ? (
-        <div className="text-center">No movies uploaded yet</div>
+        <div className="text-center text-gray-400">No movies uploaded yet.</div>
       ) : (
-        <div className="grid gap-8">
+        <div className="space-y-6">
           {movies.map((movie) => (
             <div key={movie._id} className="bg-gray-800 p-4 rounded shadow">
               <h3 className="text-xl font-bold mb-2">{movie.title}</h3>
-              <VideoPlayer filename={movie.filename} />
-              <div className="flex justify-end mt-2">
+              <VideoPlayer videoUrl={movie.url || movie.filename} title={movie.title} />
+              <div className="flex justify-end mt-3">
                 <button
                   onClick={() => handleDelete(movie._id)}
-                  className="px-3 py-1 bg-red-500 rounded hover:bg-red-700"
+                  className="px-4 py-2 bg-red-500 hover:bg-red-700 rounded"
                 >
                   Delete
                 </button>
@@ -118,3 +124,4 @@ const AdminDashboard = () => {
 };
 
 export default AdminDashboard;
+

@@ -294,13 +294,25 @@ export const getMovies = async (req, res) => {
     const moviesWithUrls = movies.map(movie => {
       const url = `${baseUrl}/uploads/${movie.filename}`;
       const thumbnailUrl = `${baseUrl}/uploads/${movie.thumbnail}`;
-      console.log('Generated URLs for movie:', { title: movie.title, url, thumbnailUrl });
+      console.log('Generated URLs for movie:', { 
+        title: movie.title, 
+        url, 
+        thumbnailUrl,
+        filename: movie.filename,
+        thumbnail: movie.thumbnail
+      });
       return {
         ...movie.toObject(),
         url,
         thumbnailUrl
       };
     });
+    
+    console.log('Sending response with movies:', moviesWithUrls.map(m => ({
+      title: m.title,
+      url: m.url,
+      thumbnailUrl: m.thumbnailUrl
+    })));
     
     res.json(moviesWithUrls);
   } catch (error) {
